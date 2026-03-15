@@ -34,10 +34,10 @@ final class SystemProxyManager: @unchecked Sendable {
         var commands: [String] = []
         for service in services {
             let escaped = service.replacingOccurrences(of: "'", with: "'\\''")
-            commands.append("networksetup -setwebproxy '\\(escaped)' \\(host) \\(port)")
-            commands.append("networksetup -setsecurewebproxy '\\(escaped)' \\(host) \\(port)")
-            commands.append("networksetup -setwebproxystate '\\(escaped)' on")
-            commands.append("networksetup -setsecurewebproxystate '\\(escaped)' on")
+            commands.append("networksetup -setwebproxy '\(escaped)' \(host) \(port)")
+            commands.append("networksetup -setsecurewebproxy '\(escaped)' \(host) \(port)")
+            commands.append("networksetup -setwebproxystate '\(escaped)' on")
+            commands.append("networksetup -setsecurewebproxystate '\(escaped)' on")
         }
 
         try runWithAdmin(commands.joined(separator: " && "))
@@ -58,17 +58,17 @@ final class SystemProxyManager: @unchecked Sendable {
             let escaped = service.replacingOccurrences(of: "'", with: "'\\''")
 
             if state.httpEnabled {
-                commands.append("networksetup -setwebproxy '\\(escaped)' \\(state.httpHost) \\(state.httpPort)")
-                commands.append("networksetup -setwebproxystate '\\(escaped)' on")
+                commands.append("networksetup -setwebproxy '\(escaped)' \(state.httpHost) \(state.httpPort)")
+                commands.append("networksetup -setwebproxystate '\(escaped)' on")
             } else {
-                commands.append("networksetup -setwebproxystate '\\(escaped)' off")
+                commands.append("networksetup -setwebproxystate '\(escaped)' off")
             }
 
             if state.httpsEnabled {
-                commands.append("networksetup -setsecurewebproxy '\\(escaped)' \\(state.httpsHost) \\(state.httpsPort)")
-                commands.append("networksetup -setsecurewebproxystate '\\(escaped)' on")
+                commands.append("networksetup -setsecurewebproxy '\(escaped)' \(state.httpsHost) \(state.httpsPort)")
+                commands.append("networksetup -setsecurewebproxystate '\(escaped)' on")
             } else {
-                commands.append("networksetup -setsecurewebproxystate '\\(escaped)' off")
+                commands.append("networksetup -setsecurewebproxystate '\(escaped)' off")
             }
         }
 

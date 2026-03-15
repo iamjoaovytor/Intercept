@@ -1,7 +1,9 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @State private var viewModel = ProxyViewModel()
+    @State private var showingExporter = false
 
     var body: some View {
         NavigationSplitView {
@@ -34,6 +36,14 @@ struct ContentView: View {
                 .tint(viewModel.isRunning ? .red : .green)
 
                 Button {
+                    showingExporter = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+                .disabled(viewModel.events.isEmpty)
+                .help("Export as HAR")
+
+                Button {
                     viewModel.clear()
                 } label: {
                     Image(systemName: "trash")
@@ -61,6 +71,18 @@ struct ContentView: View {
                 }
             }
         }
+        .fileExporter(
+            isPresented: $showingExporter,
+            document: HARDocument(events: viewModel.hasActiveFilters ? viewModel.filteredEvents : viewModel.events),
+            contentType: .json,
+            defaultFilename: "intercept-\(exportTimestamp).har"
+        ) { _ in }
+    }
+
+    private var exportTimestamp: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd-HHmmss"
+        return formatter.string(from: Date())
     }
 }
 

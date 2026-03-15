@@ -158,6 +158,11 @@ final class ProxyViewModel {
         statusFilter = nil
     }
 
+    func exportHAR() throws -> Data {
+        let eventsToExport = hasActiveFilters ? filteredEvents : events
+        return try HARExporter.export(eventsToExport)
+    }
+
     // MARK: - Private
 
     private func handleEvent(_ event: TrafficEvent) {
