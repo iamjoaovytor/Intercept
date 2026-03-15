@@ -40,7 +40,7 @@ Tests use Swift Testing (`import Testing`, `@Test`) not XCTest.
 
 Three decoupled layers — see `docs/ARCHITECTURE.md` for full details including data flow and certificate flow diagrams.
 
-1. **ProxyCore** (`Intercept/Intercept/ProxyCore/`) — SwiftNIO proxy server, TLS handlers, certificate generation. Zero UI dependencies. Key types: `ProxyServer` (lifecycle + `SequenceGenerator`), `HTTPProxyHandler` + `ResponseCollector` (Handlers/), `TrafficEvent` (Models/).
+1. **ProxyCore** (`Intercept/Intercept/ProxyCore/`) — SwiftNIO proxy server, TLS handlers, certificate generation. Zero UI dependencies. Key types: `ProxyServer` (lifecycle + `SequenceGenerator`), `HTTPProxyHandler` with `.httpProxy`/`.httpsRelay` modes + `ResponseCollector` (Handlers/), `RootCAManager` + `CertificateStore` (Certificate/), `TrafficEvent` (Models/).
 2. **TrafficStore** (`Intercept/Intercept/TrafficStore/`) — not yet implemented. Currently `ProxyViewModel` holds events in-memory directly.
 3. **InterceptUI** (`Intercept/Intercept/Views/` + `ViewModels/`) — SwiftUI app target. `ProxyViewModel` (`@Observable`, `@MainActor`) owns the `ProxyServer` and event list. `ContentView` has NavigationSplitView with toolbar. `RequestListView` shows captured traffic. `RequestDetailView` shows headers/body with JSON formatting.
 
@@ -53,6 +53,9 @@ Data flows one direction: `ProxyServer` → `TrafficEvent` (value type, `@Sendab
 - `NSLock.withLock {}` instead of `lock()`/`unlock()` in async contexts
 - Events cross from NIO threads to MainActor via `@Sendable` closure + `Task { @MainActor in }`
 - `ChannelHandlerContext.write` still uses `wrapOutboundOut` (NIOAny deprecation warnings are expected)
+- `UnsafeSendable<T>` wrapper used for `ChannelHandlerContext` captures in `@Sendable` closures (safe when accessed only from the event loop)
+- CONNECT pipeline upgrade: `removeHandler(name:)` returns futures — must `whenAllComplete` before adding handlers with same names
+- CONNECT 200 response must include `Content-Length: 0` to prevent chunked encoding from corrupting TLS handshake
 
 ## Code Guidelines
 

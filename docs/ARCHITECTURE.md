@@ -12,22 +12,19 @@ The network engine. Runs a local proxy server using SwiftNIO.
 
 **Responsibilities:**
 - Listen for incoming HTTP/HTTPS connections
-- Handle CONNECT tunneling for HTTPS (planned)
-- Generate per-domain TLS certificates signed by a local root CA (planned)
+- Handle CONNECT tunneling for HTTPS with TLS interception
+- Generate per-domain TLS certificates signed by a local root CA
 - Forward requests to the destination server
 - Emit `TrafficEvent` objects for each request/response pair
 
 **Key Types:**
 - `ProxyServer` — starts/stops the listener, manages connections (`@unchecked Sendable`, uses `NSLock`)
 - `SequenceGenerator` — thread-safe sequential ID generator
-- `HTTPProxyHandler` — ChannelInboundHandler that receives client requests, connects to upstream via `ClientBootstrap`, and relays traffic
+- `HTTPProxyHandler` — ChannelInboundHandler with two modes: `.httpProxy` (plain HTTP) and `.httpsRelay` (decrypted HTTPS). Handles CONNECT by upgrading the channel pipeline to TLS.
 - `ResponseCollector` — ChannelInboundHandler that accumulates upstream response parts and fulfills a promise
 - `TrafficEvent` — `Sendable` value type representing a request/response pair with state transitions (`.inProgress` → `.completed`/`.failed`)
-
-**Not yet implemented:**
-- `CertificateStore` — generates and caches TLS certificates
-- `RootCAManager` — creates and installs the root CA in Keychain
-- `TLSHandler` — ChannelHandler for CONNECT + TLS interception
+- `RootCAManager` — generates, persists, and installs the root CA in Keychain with trust settings
+- `CertificateStore` — generates and caches per-host TLS certificates signed by the root CA
 
 ### 2. TrafficStore (planned)
 
@@ -68,16 +65,18 @@ ProxyViewModel (@Observable, @MainActor)
 SwiftUI Views (reactive binding)
 ```
 
-## Certificate Flow (HTTPS) — planned
+## Certificate Flow (HTTPS)
 
 ```
 1. Client sends CONNECT example.com:443
-2. Intercept accepts the CONNECT, responds 200
-3. RootCAManager provides root CA (created on first launch)
-4. CertificateStore generates cert for example.com signed by root CA
-5. TLS handshake with client using generated cert
-6. TLS handshake with real server using system trust
-7. Traffic flows through, decrypted on both sides
+2. HTTPProxyHandler responds 200 (with Content-Length: 0 to avoid chunked framing)
+3. Pipeline upgraded: HTTP codecs removed, NIOSSLServerHandler added
+4. RootCAManager provides root CA (created + Keychain-installed on first launch)
+5. CertificateStore generates P-256 ECDSA cert for example.com signed by root CA
+6. TLS handshake with client using generated cert (TLS 1.2+)
+7. New HTTPProxyHandler (.httpsRelay) added with fresh HTTP codecs after TLS
+8. Upstream connection uses NIOSSLClientHandler with system trust
+9. Traffic flows through, decrypted on both sides
 ```
 
 ## Package Structure
@@ -97,7 +96,9 @@ Intercept/
 │   │   ├── ProxyServer.swift
 │   │   ├── Handlers/
 │   │   │   └── HTTPHandler.swift
-│   │   ├── Certificate/        # (empty, planned)
+│   │   ├── Certificate/
+│   │   │   ├── RootCAManager.swift
+│   │   │   └── CertificateStore.swift
 │   │   └── Models/
 │   │       └── TrafficEvent.swift
 │   ├── TrafficStore/           # (empty, planned)

@@ -1,6 +1,15 @@
 import Foundation
-import NIO
-import NIOHTTP1
+@preconcurrency import NIO
+@preconcurrency import NIOHTTP1
+@preconcurrency import NIOSSL
+
+// MARK: - Sendable Wrapper
+
+/// Wraps a non-Sendable value for use in @Sendable closures.
+/// Safe when the value is only accessed from a single NIO event loop.
+private struct UnsafeSendable<T>: @unchecked Sendable {
+    let value: T
+}
 
 // MARK: - HTTPProxyHandler
 
@@ -8,14 +17,28 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
     typealias InboundIn = HTTPServerRequestPart
     typealias OutboundOut = HTTPServerResponsePart
 
+    enum Mode {
+        case httpProxy
+        case httpsRelay(host: String, port: Int)
+    }
+
+    private let mode: Mode
     private let sequenceGenerator: SequenceGenerator
+    private let certificateStore: CertificateStore
     private let onEvent: @Sendable (TrafficEvent) -> Void
 
     private var requestHead: HTTPRequestHead?
     private var requestBody: ByteBuffer?
 
-    init(sequenceGenerator: SequenceGenerator, onEvent: @escaping @Sendable (TrafficEvent) -> Void) {
+    init(
+        mode: Mode = .httpProxy,
+        sequenceGenerator: SequenceGenerator,
+        certificateStore: CertificateStore,
+        onEvent: @escaping @Sendable (TrafficEvent) -> Void
+    ) {
+        self.mode = mode
         self.sequenceGenerator = sequenceGenerator
+        self.certificateStore = certificateStore
         self.onEvent = onEvent
     }
 
@@ -29,14 +52,95 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
             requestBody?.writeBuffer(&buffer)
         case .end:
             guard let head = requestHead else { return }
-            forwardRequest(head: head, body: requestBody, context: context)
+            if head.method == .CONNECT {
+                handleConnect(head: head, context: context)
+            } else {
+                forwardRequest(head: head, body: requestBody, context: context)
+            }
             requestHead = nil
             requestBody = nil
         }
     }
 
     func errorCaught(context: ChannelHandlerContext, error: Error) {
+        print("[Intercept] errorCaught (\(mode)): \(error)")
         context.close(promise: nil)
+    }
+
+    // MARK: - CONNECT (HTTPS Tunneling)
+
+    private func handleConnect(head: HTTPRequestHead, context: ChannelHandlerContext) {
+        let parts = head.uri.split(separator: ":")
+        guard let hostPart = parts.first else {
+            writeError(.badRequest, message: "Invalid CONNECT target", context: context)
+            return
+        }
+        let host = String(hostPart)
+        let port = parts.count > 1 ? Int(parts[1]) ?? 443 : 443
+
+        // Send 200 Connection Established, then upgrade pipeline after flush completes.
+        // Content-Length: 0 prevents HTTPResponseEncoder from using chunked encoding,
+        // which would add a "0\r\n\r\n" terminator that corrupts the TLS handshake.
+        var response = HTTPResponseHead(version: .http1_1, status: .ok)
+        response.headers.add(name: "Content-Length", value: "0")
+        context.write(wrapOutboundOut(.head(response)), promise: nil)
+
+        let flushPromise = context.eventLoop.makePromise(of: Void.self)
+        context.writeAndFlush(wrapOutboundOut(.end(nil)), promise: flushPromise)
+
+        print("[Intercept] CONNECT \(host):\(port) — sending 200, will upgrade pipeline")
+        let wrappedCtx = UnsafeSendable(value: context)
+        flushPromise.futureResult.whenComplete { [weak self] _ in
+            guard let self else { return }
+            print("[Intercept] 200 flushed, upgrading pipeline for \(host)")
+            self.upgradePipelineForTLS(host: host, port: port, context: wrappedCtx.value)
+        }
+    }
+
+    private func upgradePipelineForTLS(host: String, port: Int, context: ChannelHandlerContext) {
+        let pipeline = context.pipeline
+        let channel = context.channel
+        let certStore = self.certificateStore
+        let seqGen = self.sequenceGenerator
+        let onEvent = self.onEvent
+
+        // removeHandler(name:) is async — must wait for all removals before adding
+        // handlers with the same names, otherwise the add fails with a name conflict
+        EventLoopFuture.whenAllComplete([
+            pipeline.removeHandler(name: "http-proxy-handler"),
+            pipeline.removeHandler(name: "http-response-encoder"),
+            pipeline.removeHandler(name: "http-request-decoder"),
+        ], on: context.eventLoop).whenSuccess { _ in
+            do {
+                print("[Intercept] handlers removed, building TLS context for \(host)")
+                let tlsConfig = try certStore.tlsConfiguration(forHost: host)
+                let sslContext = try NIOSSLContext(configuration: tlsConfig)
+
+                try pipeline.syncOperations.addHandler(
+                    NIOSSLServerHandler(context: sslContext), name: "tls-server"
+                )
+                try pipeline.syncOperations.addHandler(
+                    ByteToMessageHandler(HTTPRequestDecoder(leftOverBytesStrategy: .forwardBytes)),
+                    name: "http-request-decoder"
+                )
+                try pipeline.syncOperations.addHandler(
+                    HTTPResponseEncoder(), name: "http-response-encoder"
+                )
+                try pipeline.syncOperations.addHandler(
+                    HTTPProxyHandler(
+                        mode: .httpsRelay(host: host, port: port),
+                        sequenceGenerator: seqGen,
+                        certificateStore: certStore,
+                        onEvent: onEvent
+                    ),
+                    name: "http-proxy-handler"
+                )
+                print("[Intercept] TLS pipeline ready for \(host)")
+            } catch {
+                print("[Intercept] TLS pipeline upgrade FAILED for \(host): \(error)")
+                channel.close(promise: nil)
+            }
+        }
     }
 
     // MARK: - Request Forwarding
@@ -46,18 +150,24 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
         body: ByteBuffer?,
         context: ChannelHandlerContext
     ) {
-        // CONNECT (HTTPS) is not supported yet
-        if head.method == .CONNECT {
-            writeError(.notImplemented, message: "HTTPS interception not yet supported", context: context)
-            return
-        }
+        let resolved: (host: String, port: Int, url: URL)
 
-        guard let url = URL(string: head.uri), let host = url.host() else {
-            writeError(.badRequest, message: "Invalid proxy request URL", context: context)
-            return
-        }
+        switch mode {
+        case .httpProxy:
+            guard let url = URL(string: head.uri), let host = url.host() else {
+                writeError(.badRequest, message: "Invalid proxy request URL", context: context)
+                return
+            }
+            resolved = (host, url.port ?? 80, url)
 
-        let port = url.port ?? 80
+        case .httpsRelay(let host, let port):
+            let portSuffix = port == 443 ? "" : ":\(port)"
+            guard let url = URL(string: "https://\(host)\(portSuffix)\(head.uri)") else {
+                writeError(.badRequest, message: "Invalid request URL", context: context)
+                return
+            }
+            resolved = (host, port, url)
+        }
 
         // Build TrafficEvent
         let seq = sequenceGenerator.next()
@@ -66,30 +176,32 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
 
         let trafficRequest = TrafficEvent.Request(
             method: head.method.rawValue,
-            url: url,
+            url: resolved.url,
             headers: requestHeaders,
             body: bodyData.data,
             bodyTruncated: bodyData.truncated
         )
         let event = TrafficEvent(sequenceNumber: seq, request: trafficRequest)
 
-        // Rewrite request for upstream (relative URI, strip proxy headers)
+        // Rewrite request for upstream
         var forwardHead = head
-        forwardHead.uri = relativePath(from: url)
+        if case .httpProxy = mode {
+            forwardHead.uri = relativePath(from: resolved.url)
+        }
         if !forwardHead.headers.contains(name: "Host") {
-            forwardHead.headers.add(name: "Host", value: host)
+            forwardHead.headers.add(name: "Host", value: resolved.host)
         }
         forwardHead.headers.remove(name: "Proxy-Connection")
         forwardHead.headers.remove(name: "Proxy-Authorization")
 
         // Connect to upstream server
         let onEvent = self.onEvent
+        let wrappedContext = UnsafeSendable(value: context)
 
-        ClientBootstrap(group: context.eventLoop)
-            .channelInitializer { $0.pipeline.addHTTPClientHandlers() }
-            .connect(host: host, port: port)
+        connectToUpstream(host: resolved.host, port: resolved.port, eventLoop: context.eventLoop)
             .whenComplete { [weak self] result in
-                guard let self, context.channel.isActive else { return }
+                let ctx = wrappedContext.value
+                guard let self, ctx.channel.isActive else { return }
 
                 switch result {
                 case .success(let upstream):
@@ -99,15 +211,55 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
                         body: body,
                         event: event,
                         onEvent: onEvent,
-                        context: context
+                        context: ctx
                     )
                 case .failure(let error):
                     var event = event
                     event.fail(with: "Connection failed: \(error.localizedDescription)")
                     onEvent(event)
-                    self.writeError(.badGateway, message: "Connection failed", context: context)
+                    self.writeError(.badGateway, message: "Connection failed", context: ctx)
                 }
             }
+    }
+
+    private func connectToUpstream(
+        host: String,
+        port: Int,
+        eventLoop: any EventLoop
+    ) -> EventLoopFuture<Channel> {
+        let bootstrap = ClientBootstrap(group: eventLoop)
+
+        switch mode {
+        case .httpProxy:
+            return bootstrap
+                .channelInitializer { channel in
+                    do {
+                        try channel.pipeline.syncOperations.addHandler(HTTPRequestEncoder())
+                        try channel.pipeline.syncOperations.addHandler(ByteToMessageHandler(HTTPResponseDecoder()))
+                        return channel.eventLoop.makeSucceededVoidFuture()
+                    } catch {
+                        return channel.eventLoop.makeFailedFuture(error)
+                    }
+                }
+                .connect(host: host, port: port)
+
+        case .httpsRelay:
+            return bootstrap
+                .channelInitializer { channel in
+                    do {
+                        let tlsConfig = TLSConfiguration.makeClientConfiguration()
+                        let sslContext = try NIOSSLContext(configuration: tlsConfig)
+                        let sslHandler = try NIOSSLClientHandler(context: sslContext, serverHostname: host)
+                        try channel.pipeline.syncOperations.addHandler(sslHandler)
+                        try channel.pipeline.syncOperations.addHandler(HTTPRequestEncoder())
+                        try channel.pipeline.syncOperations.addHandler(ByteToMessageHandler(HTTPResponseDecoder()))
+                        return channel.eventLoop.makeSucceededVoidFuture()
+                    } catch {
+                        return channel.eventLoop.makeFailedFuture(error)
+                    }
+                }
+                .connect(host: host, port: port)
+        }
     }
 
     private func relay(
@@ -120,18 +272,23 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
     ) {
         let responsePromise = context.eventLoop.makePromise(of: UpstreamResponse.self)
 
-        upstream.pipeline.addHandler(ResponseCollector(promise: responsePromise)).whenSuccess {
+        do {
+            try upstream.pipeline.syncOperations.addHandler(ResponseCollector(promise: responsePromise))
             upstream.write(HTTPClientRequestPart.head(head), promise: nil)
             if let body, body.readableBytes > 0 {
                 upstream.write(HTTPClientRequestPart.body(.byteBuffer(body)), promise: nil)
             }
             upstream.writeAndFlush(HTTPClientRequestPart.end(nil), promise: nil)
+        } catch {
+            responsePromise.fail(error)
         }
 
         var event = event
+        let wrappedContext = UnsafeSendable(value: context)
 
         responsePromise.futureResult.whenComplete { [weak self] result in
-            guard let self, context.channel.isActive else { return }
+            let ctx = wrappedContext.value
+            guard let self, ctx.channel.isActive else { return }
 
             switch result {
             case .success(let response):
@@ -151,16 +308,16 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
                 onEvent(event)
 
                 // Forward response to client
-                context.write(self.wrapOutboundOut(.head(response.head)), promise: nil)
+                ctx.write(self.wrapOutboundOut(.head(response.head)), promise: nil)
                 if let body = response.body, body.readableBytes > 0 {
-                    context.write(self.wrapOutboundOut(.body(.byteBuffer(body))), promise: nil)
+                    ctx.write(self.wrapOutboundOut(.body(.byteBuffer(body))), promise: nil)
                 }
-                context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
+                ctx.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: nil)
 
             case .failure(let error):
                 event.fail(with: error.localizedDescription)
                 onEvent(event)
-                self.writeError(.badGateway, message: "Upstream error", context: context)
+                self.writeError(.badGateway, message: "Upstream error", context: ctx)
             }
         }
     }
@@ -205,15 +362,16 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
         buffer.writeBytes(bodyBytes)
         context.write(wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
 
+        let wrappedCtx = UnsafeSendable(value: context)
         context.writeAndFlush(wrapOutboundOut(.end(nil))).whenComplete { _ in
-            context.close(promise: nil)
+            wrappedCtx.value.close(promise: nil)
         }
     }
 }
 
 // MARK: - Response Collector
 
-private struct UpstreamResponse {
+private struct UpstreamResponse: Sendable {
     let head: HTTPResponseHead
     let body: ByteBuffer?
 }

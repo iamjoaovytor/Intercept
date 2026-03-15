@@ -1,6 +1,6 @@
 import Foundation
-import NIO
-import NIOHTTP1
+@preconcurrency import NIO
+@preconcurrency import NIOHTTP1
 
 // MARK: - ProxyServer
 
@@ -33,16 +33,36 @@ final class ProxyServer: @unchecked Sendable {
     }
 
     func start() async throws {
+        let rootCAManager = RootCAManager()
+        let ca = try rootCAManager.rootCA()
+        try rootCAManager.installInKeychainIfNeeded()
+        let certStore = CertificateStore(rootCA: ca.certificate, rootKey: ca.privateKey)
+
         let seqGen = sequenceGenerator
         let onEvent = eventHandler
 
         let bootstrap = ServerBootstrap(group: group)
             .serverChannelOption(.backlog, value: 256)
             .childChannelInitializer { channel in
-                channel.pipeline.configureHTTPServerPipeline().flatMap {
-                    channel.pipeline.addHandler(
-                        HTTPProxyHandler(sequenceGenerator: seqGen, onEvent: onEvent)
+                do {
+                    try channel.pipeline.syncOperations.addHandler(
+                        ByteToMessageHandler(HTTPRequestDecoder(leftOverBytesStrategy: .forwardBytes)),
+                        name: "http-request-decoder"
                     )
+                    try channel.pipeline.syncOperations.addHandler(
+                        HTTPResponseEncoder(), name: "http-response-encoder"
+                    )
+                    try channel.pipeline.syncOperations.addHandler(
+                        HTTPProxyHandler(
+                            sequenceGenerator: seqGen,
+                            certificateStore: certStore,
+                            onEvent: onEvent
+                        ),
+                        name: "http-proxy-handler"
+                    )
+                    return channel.eventLoop.makeSucceededVoidFuture()
+                } catch {
+                    return channel.eventLoop.makeFailedFuture(error)
                 }
             }
             .childChannelOption(.socketOption(.so_reuseaddr), value: 1)

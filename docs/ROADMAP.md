@@ -4,9 +4,9 @@
 
 - [x] SwiftNIO proxy server listening on configurable port
 - [x] HTTP request/response interception and forwarding
-- [ ] HTTPS interception via CONNECT tunneling
-- [ ] Root CA generation and Keychain installation
-- [ ] Dynamic per-domain certificate generation
+- [x] HTTPS interception via CONNECT tunneling
+- [x] Root CA generation and Keychain installation
+- [x] Dynamic per-domain certificate generation
 - [ ] System proxy auto-configuration (SystemConfiguration.framework)
 - [x] Request list view with domain, method, status, duration
 - [x] Request detail view with headers and body
