@@ -33,17 +33,26 @@ Tests use Swift Testing (`import Testing`, `@Test`) not XCTest.
 - **TLS/Certs**: Security.framework + CryptoKit
 - **UI**: SwiftUI with AppKit (NSTableView) for performance-critical lists
 - **Persistence**: SwiftData
-- **Dependencies** (via Xcode SPM): swift-nio-ssl (NIOSSL), swift-certificates (X509)
+- **Dependencies** (via Xcode SPM): swift-nio (NIO, NIOHTTP1), swift-nio-ssl (NIOSSL), swift-certificates (X509)
+- **App Sandbox**: disabled — proxy needs unrestricted network access
 
 ## Architecture
 
 Three decoupled layers — see `docs/ARCHITECTURE.md` for full details including data flow and certificate flow diagrams.
 
-1. **ProxyCore** (`Intercept/Intercept/ProxyCore/`) — SwiftNIO proxy server, TLS handlers, certificate generation. Zero UI dependencies. Key types: `ProxyServer`, `CertificateStore`, `RootCAManager`, `HTTPHandler`, `TLSHandler`, `TrafficEvent`.
-2. **TrafficStore** (`Intercept/Intercept/TrafficStore/`) — in-memory + SwiftData persistence. Receives `TrafficEvent` from ProxyCore, provides `@Observable` collections. Key types: `TrafficSession`, `TrafficEntry`, `TrafficFilter`.
-3. **InterceptUI** (`Intercept/Intercept/Views/` + `ViewModels/`) — SwiftUI app target with the main window, request list, detail panels, filters.
+1. **ProxyCore** (`Intercept/Intercept/ProxyCore/`) — SwiftNIO proxy server, TLS handlers, certificate generation. Zero UI dependencies. Key types: `ProxyServer` (lifecycle + `SequenceGenerator`), `HTTPProxyHandler` + `ResponseCollector` (Handlers/), `TrafficEvent` (Models/).
+2. **TrafficStore** (`Intercept/Intercept/TrafficStore/`) — not yet implemented. Currently `ProxyViewModel` holds events in-memory directly.
+3. **InterceptUI** (`Intercept/Intercept/Views/` + `ViewModels/`) — SwiftUI app target. `ProxyViewModel` (`@Observable`, `@MainActor`) owns the `ProxyServer` and event list. `ContentView` has NavigationSplitView with toolbar. `RequestListView` shows captured traffic. `RequestDetailView` shows headers/body with JSON formatting.
 
-Data flows one direction: `ProxyServer` → `TrafficEvent` (value type) → `TrafficStore` (@Observable) → SwiftUI Views.
+Data flows one direction: `ProxyServer` → `TrafficEvent` (value type, `@Sendable` closure) → `ProxyViewModel` (`@MainActor`) → SwiftUI Views.
+
+## Concurrency Notes
+
+- `ProxyServer` is `@unchecked Sendable` — uses `NSLock` for channel storage (not `NIOLockedValueBox`, unavailable in current NIO version)
+- `HTTPProxyHandler` is `@unchecked Sendable` — NIO handlers are single-threaded per event loop
+- `NSLock.withLock {}` instead of `lock()`/`unlock()` in async contexts
+- Events cross from NIO threads to MainActor via `@Sendable` closure + `Task { @MainActor in }`
+- `ChannelHandlerContext.write` still uses `wrapOutboundOut` (NIOAny deprecation warnings are expected)
 
 ## Code Guidelines
 

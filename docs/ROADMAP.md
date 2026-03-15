@@ -2,18 +2,18 @@
 
 ## Phase 1 — MVP (Core Proxy + Basic UI)
 
-- [ ] SwiftNIO proxy server listening on configurable port
-- [ ] HTTP request/response interception and forwarding
+- [x] SwiftNIO proxy server listening on configurable port
+- [x] HTTP request/response interception and forwarding
 - [ ] HTTPS interception via CONNECT tunneling
 - [ ] Root CA generation and Keychain installation
 - [ ] Dynamic per-domain certificate generation
 - [ ] System proxy auto-configuration (SystemConfiguration.framework)
-- [ ] Request list view with domain, method, status, duration
-- [ ] Request detail view with headers and body
-- [ ] JSON body viewer with syntax highlighting
+- [x] Request list view with domain, method, status, duration
+- [x] Request detail view with headers and body
+- [x] JSON body viewer with syntax highlighting
 - [ ] Basic filtering: domain, method, status code
-- [ ] Start/stop proxy toggle
-- [ ] Clear session
+- [x] Start/stop proxy toggle
+- [x] Clear session
 
 ## Phase 2 — Power Features
 
