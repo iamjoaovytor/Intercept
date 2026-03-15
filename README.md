@@ -2,7 +2,7 @@
 
 A native macOS HTTP/HTTPS debugging proxy built with Swift.
 
-Intercept sits between your app and the network, letting you inspect, filter, and modify every request and response in real time.
+Intercept sits between your apps and the network, letting you inspect, filter, and modify every HTTP/HTTPS request and response in real time. Works with any application — browsers, iOS simulators, CLI tools, and more.
 
 ![macOS](https://img.shields.io/badge/macOS-14%2B-blue)
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange)
@@ -31,11 +31,11 @@ Intercept sits between your app and the network, letting you inspect, filter, an
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  Client App  │────▶│  Intercept   │────▶│   Server    │
-│  (iOS Sim)   │◀────│  Proxy Core  │◀────│  (API)      │
-└─────────────┘     └──────┬───────┘     └─────────────┘
-                           │
-                    ┌──────┴───────┐
+│  Any App    │────▶│  Intercept   │────▶│   Server    │
+│  (Browser,  │◀────│  Proxy Core  │◀────│  (API)      │
+│  Simulator, │     └──────┬───────┘     └─────────────┘
+│  CLI, etc.) │            │
+└─────────────┘     ┌──────┴───────┐
                     │   SwiftUI    │
                     │   Frontend   │
                     └──────────────┘
