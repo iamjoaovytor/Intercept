@@ -44,6 +44,7 @@ final class SystemProxyManager: @unchecked Sendable {
     }
 
     /// Restores the original proxy settings saved during `enable()`.
+    /// Tries without admin first (macOS caches authorization ~5 min), falls back to admin prompt.
     func disable() {
         let saved = lock.withLock {
             let copy = savedSettings
@@ -72,7 +73,15 @@ final class SystemProxyManager: @unchecked Sendable {
             }
         }
 
-        _ = try? runWithAdmin(commands.joined(separator: " && "))
+        let joined = commands.joined(separator: " && ")
+
+        // Try without admin first — works if macOS cached the authorization
+        if runShell(joined) {
+            return
+        }
+
+        // Fall back to admin prompt
+        _ = try? runWithAdmin(joined)
     }
 
     // MARK: - Network Services
@@ -140,6 +149,25 @@ final class SystemProxyManager: @unchecked Sendable {
         }
 
         return result.stringValue ?? ""
+    }
+
+    /// Runs a shell command without admin privileges.
+    /// Returns true if the command succeeded.
+    @discardableResult
+    private func runShell(_ command: String) -> Bool {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", command]
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+
+        do {
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus == 0
+        } catch {
+            return false
+        }
     }
 
     /// Runs networksetup without admin (for read-only queries).

@@ -118,17 +118,15 @@ final class ProxyViewModel {
 
     func stop() {
         guard isRunning else { return }
+        isRunning = false
 
         systemProxy.disable()
 
+        let srv = server
+        server = nil
+
         Task {
-            do {
-                try await server?.stop()
-            } catch {
-                self.error = error.localizedDescription
-            }
-            server = nil
-            isRunning = false
+            try? await srv?.stop()
         }
     }
 

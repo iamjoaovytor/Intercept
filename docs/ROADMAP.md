@@ -23,7 +23,7 @@
 - [ ] Response body viewers: XML, HTML, image preview
 - [ ] Request/response size and timing breakdown
 - [ ] Session persistence with SwiftData
-- [ ] Export session as HAR file
+- [x] Export session as HAR file
 
 ## Phase 3 — Polish
 

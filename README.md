@@ -10,22 +10,19 @@ Intercept sits between your apps and the network, letting you inspect, filter, a
 
 ## Features
 
-- **HTTP/HTTPS Interception** — Man-in-the-middle proxy with dynamic certificate generation
-- **Real-time Request List** — Browse all captured traffic with filtering by domain, method, and status code
-- **JSON Viewer** — Syntax-highlighted, collapsible JSON body inspector
-- **Request Detail** — Headers, body, timing, and TLS info at a glance
-- **System Proxy** — Automatically configures macOS proxy settings
-- **Breakpoints** — Pause, inspect, and modify requests before they hit the server
-- **Map Local** — Serve local JSON files as API responses for testing
+- **HTTP/HTTPS Interception** — MITM proxy with dynamic per-domain certificate generation
+- **Real-time Traffic List** — Browse captured requests with filtering by text, method, and status code
+- **Request Detail** — Headers and body with JSON auto-formatting
+- **System Proxy** — Automatically configures/restores macOS proxy settings
+- **HAR Export** — Export captured traffic as HAR 1.2 files
 
 ## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
 | Proxy Engine | SwiftNIO |
-| TLS / Certificates | Security.framework + CryptoKit |
-| UI | SwiftUI + AppKit (NSTableView for performance) |
-| Persistence | SwiftData |
+| TLS / Certificates | Security.framework + CryptoKit + swift-certificates |
+| UI | SwiftUI |
 
 ## Architecture
 
@@ -44,7 +41,7 @@ Intercept sits between your apps and the network, letting you inspect, filter, a
 ### Modules
 
 - **ProxyCore** — SwiftNIO-based proxy server, TLS handling, certificate generation
-- **TrafficStore** — In-memory + SwiftData persistence of captured requests
+- **TrafficStore** — In-memory event storage (SwiftData persistence planned)
 - **InterceptUI** — SwiftUI views, request list, detail panels, filters
 
 ## Requirements

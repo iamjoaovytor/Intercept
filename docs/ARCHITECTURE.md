@@ -26,7 +26,7 @@ The network engine. Runs a local proxy server using SwiftNIO.
 - `TrafficEvent` — `Sendable` value type representing a request/response pair with state transitions (`.inProgress` → `.completed`/`.failed`)
 - `RootCAManager` — generates, persists, and installs the root CA in Keychain with trust settings
 - `CertificateStore` — generates and caches per-host TLS certificates signed by the root CA
-- `SystemProxyManager` — enables/disables macOS system HTTP/HTTPS proxy via `networksetup`, saves and restores original settings
+- `SystemProxyManager` — enables/disables macOS system HTTP/HTTPS proxy via `networksetup`, saves and restores original settings. `disable()` tries without admin first (macOS caches auth ~5 min), falls back to admin prompt only if needed.
 
 ### 2. TrafficStore (planned)
 
