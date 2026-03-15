@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		BD3E1A302F66FCBD009D6F22 /* NIOSSL in Frameworks */ = {isa = PBXBuildFile; productRef = BD3E1A2F2F66FCBD009D6F22 /* NIOSSL */; };
 		BD3E1A372F66FCF2009D6F22 /* X509 in Frameworks */ = {isa = PBXBuildFile; productRef = BD3E1A362F66FCF2009D6F22 /* X509 */; };
+		BD3E1AF02F670AC5009D6F22 /* NIO in Frameworks */ = {isa = PBXBuildFile; productRef = BD3E1AEF2F670AC5009D6F22 /* NIO */; };
+		BD3E1AF12F670AC6009D6F22 /* NIOHTTP1 in Frameworks */ = {isa = PBXBuildFile; productRef = BD3E1AF22F670AC6009D6F22 /* NIOHTTP1 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +59,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BD3E1AF02F670AC5009D6F22 /* NIO in Frameworks */,
+				BD3E1AF12F670AC6009D6F22 /* NIOHTTP1 in Frameworks */,
 				BD3E1A302F66FCBD009D6F22 /* NIOSSL in Frameworks */,
 				BD3E1A372F66FCF2009D6F22 /* X509 in Frameworks */,
 			);
@@ -85,6 +89,7 @@
 				BD3E19F92F66FC61009D6F22 /* Intercept */,
 				BD3E1A092F66FC61009D6F22 /* InterceptTests */,
 				BD3E1A132F66FC61009D6F22 /* InterceptUITests */,
+				BD3E1AED2F670A58009D6F22 /* Frameworks */,
 				BD3E19F82F66FC61009D6F22 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -97,6 +102,13 @@
 				BD3E1A102F66FC61009D6F22 /* InterceptUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		BD3E1AED2F670A58009D6F22 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -121,6 +133,8 @@
 			packageProductDependencies = (
 				BD3E1A2F2F66FCBD009D6F22 /* NIOSSL */,
 				BD3E1A362F66FCF2009D6F22 /* X509 */,
+				BD3E1AEF2F670AC5009D6F22 /* NIO */,
+				BD3E1AF22F670AC6009D6F22 /* NIOHTTP1 */,
 			);
 			productName = Intercept;
 			productReference = BD3E19F72F66FC61009D6F22 /* Intercept.app */;
@@ -207,6 +221,7 @@
 			packageReferences = (
 				BD3E1A2E2F66FCBD009D6F22 /* XCRemoteSwiftPackageReference "swift-nio-ssl" */,
 				BD3E1A352F66FCF2009D6F22 /* XCRemoteSwiftPackageReference "swift-certificates" */,
+				BD3E1AEE2F670AC5009D6F22 /* XCRemoteSwiftPackageReference "swift-nio" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BD3E19F82F66FC61009D6F22 /* Products */;
@@ -604,6 +619,14 @@
 				minimumVersion = 1.18.0;
 			};
 		};
+		BD3E1AEE2F670AC5009D6F22 /* XCRemoteSwiftPackageReference "swift-nio" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-nio.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.96.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -616,6 +639,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BD3E1A352F66FCF2009D6F22 /* XCRemoteSwiftPackageReference "swift-certificates" */;
 			productName = X509;
+		};
+		BD3E1AEF2F670AC5009D6F22 /* NIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD3E1AEE2F670AC5009D6F22 /* XCRemoteSwiftPackageReference "swift-nio" */;
+			productName = NIO;
+		};
+		BD3E1AF22F670AC6009D6F22 /* NIOHTTP1 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD3E1AEE2F670AC5009D6F22 /* XCRemoteSwiftPackageReference "swift-nio" */;
+			productName = NIOHTTP1;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
