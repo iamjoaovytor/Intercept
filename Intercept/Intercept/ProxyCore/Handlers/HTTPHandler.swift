@@ -63,7 +63,6 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
     }
 
     func errorCaught(context: ChannelHandlerContext, error: Error) {
-        print("[Intercept] errorCaught (\(mode)): \(error)")
         context.close(promise: nil)
     }
 
@@ -88,11 +87,9 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
         let flushPromise = context.eventLoop.makePromise(of: Void.self)
         context.writeAndFlush(wrapOutboundOut(.end(nil)), promise: flushPromise)
 
-        print("[Intercept] CONNECT \(host):\(port) — sending 200, will upgrade pipeline")
         let wrappedCtx = UnsafeSendable(value: context)
         flushPromise.futureResult.whenComplete { [weak self] _ in
             guard let self else { return }
-            print("[Intercept] 200 flushed, upgrading pipeline for \(host)")
             self.upgradePipelineForTLS(host: host, port: port, context: wrappedCtx.value)
         }
     }
@@ -112,7 +109,6 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
             pipeline.removeHandler(name: "http-request-decoder"),
         ], on: context.eventLoop).whenSuccess { _ in
             do {
-                print("[Intercept] handlers removed, building TLS context for \(host)")
                 let tlsConfig = try certStore.tlsConfiguration(forHost: host)
                 let sslContext = try NIOSSLContext(configuration: tlsConfig)
 
@@ -135,9 +131,7 @@ final class HTTPProxyHandler: ChannelInboundHandler, RemovableChannelHandler, @u
                     ),
                     name: "http-proxy-handler"
                 )
-                print("[Intercept] TLS pipeline ready for \(host)")
             } catch {
-                print("[Intercept] TLS pipeline upgrade FAILED for \(host): \(error)")
                 channel.close(promise: nil)
             }
         }

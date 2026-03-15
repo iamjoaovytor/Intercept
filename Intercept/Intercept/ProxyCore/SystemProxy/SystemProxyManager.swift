@@ -19,6 +19,7 @@ final class SystemProxyManager: @unchecked Sendable {
 
     /// Configures all active network services to use the given proxy.
     /// Saves current settings for later restoration.
+    /// Uses AppleScript to request admin privileges (shows macOS password dialog).
     func enable(host: String, port: Int) throws {
         let services = try activeNetworkServices()
 
@@ -30,14 +31,16 @@ final class SystemProxyManager: @unchecked Sendable {
             }
         }
 
+        var commands: [String] = []
         for service in services {
-            try run("networksetup", "-setwebproxy", service, host, String(port))
-            try run("networksetup", "-setsecurewebproxy", service, host, String(port))
-            try run("networksetup", "-setwebproxystate", service, "on")
-            try run("networksetup", "-setsecurewebproxystate", service, "on")
+            let escaped = service.replacingOccurrences(of: "'", with: "'\\''")
+            commands.append("networksetup -setwebproxy '\\(escaped)' \\(host) \\(port)")
+            commands.append("networksetup -setsecurewebproxy '\\(escaped)' \\(host) \\(port)")
+            commands.append("networksetup -setwebproxystate '\\(escaped)' on")
+            commands.append("networksetup -setsecurewebproxystate '\\(escaped)' on")
         }
 
-        print("[Intercept] System proxy enabled on \(services.joined(separator: ", "))")
+        try runWithAdmin(commands.joined(separator: " && "))
     }
 
     /// Restores the original proxy settings saved during `enable()`.
@@ -48,33 +51,34 @@ final class SystemProxyManager: @unchecked Sendable {
             return copy
         }
 
+        guard !saved.isEmpty else { return }
+
+        var commands: [String] = []
         for (service, state) in saved {
-            // Restore HTTP proxy
+            let escaped = service.replacingOccurrences(of: "'", with: "'\\''")
+
             if state.httpEnabled {
-                _ = try? run("networksetup", "-setwebproxy", service, state.httpHost, String(state.httpPort))
-                _ = try? run("networksetup", "-setwebproxystate", service, "on")
+                commands.append("networksetup -setwebproxy '\\(escaped)' \\(state.httpHost) \\(state.httpPort)")
+                commands.append("networksetup -setwebproxystate '\\(escaped)' on")
             } else {
-                _ = try? run("networksetup", "-setwebproxystate", service, "off")
+                commands.append("networksetup -setwebproxystate '\\(escaped)' off")
             }
 
-            // Restore HTTPS proxy
             if state.httpsEnabled {
-                _ = try? run("networksetup", "-setsecurewebproxy", service, state.httpsHost, String(state.httpsPort))
-                _ = try? run("networksetup", "-setsecurewebproxystate", service, "on")
+                commands.append("networksetup -setsecurewebproxy '\\(escaped)' \\(state.httpsHost) \\(state.httpsPort)")
+                commands.append("networksetup -setsecurewebproxystate '\\(escaped)' on")
             } else {
-                _ = try? run("networksetup", "-setsecurewebproxystate", service, "off")
+                commands.append("networksetup -setsecurewebproxystate '\\(escaped)' off")
             }
         }
 
-        if !saved.isEmpty {
-            print("[Intercept] System proxy restored for \(saved.keys.joined(separator: ", "))")
-        }
+        _ = try? runWithAdmin(commands.joined(separator: " && "))
     }
 
     // MARK: - Network Services
 
     private func activeNetworkServices() throws -> [String] {
-        let output = try runCapture("networksetup", "-listallnetworkservices")
+        let output = try runCapture("-listallnetworkservices")
         return output
             .components(separatedBy: "\n")
             .dropFirst() // First line is a header
@@ -83,8 +87,8 @@ final class SystemProxyManager: @unchecked Sendable {
     }
 
     private func currentProxyState(for service: String) throws -> ServiceProxyState {
-        let http = try parseProxyOutput(runCapture("networksetup", "-getwebproxy", service))
-        let https = try parseProxyOutput(runCapture("networksetup", "-getsecurewebproxy", service))
+        let http = try parseProxyOutput(runCapture("-getwebproxy", service))
+        let https = try parseProxyOutput(runCapture("-getsecurewebproxy", service))
 
         return ServiceProxyState(
             httpEnabled: http.enabled,
@@ -118,29 +122,31 @@ final class SystemProxyManager: @unchecked Sendable {
 
     // MARK: - Shell
 
+    /// Runs a shell command with admin privileges via AppleScript.
+    /// Shows the native macOS authentication dialog.
     @discardableResult
-    private func run(_ args: String...) throws -> Process {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/sbin/networksetup")
-        process.arguments = Array(args.dropFirst()) // first arg is "networksetup", skip it
-        process.standardOutput = FileHandle.nullDevice
-        process.standardError = FileHandle.nullDevice
-
-        // Actually, args includes "networksetup" as first element but we set executableURL directly
-        process.arguments = Array(args.dropFirst())
-        try process.run()
-        process.waitUntilExit()
-
-        guard process.terminationStatus == 0 else {
-            throw SystemProxyError.commandFailed(args.joined(separator: " "), process.terminationStatus)
+    private func runWithAdmin(_ command: String) throws -> String {
+        let script = "do shell script \"\(command)\" with administrator privileges"
+        guard let appleScript = NSAppleScript(source: script) else {
+            throw SystemProxyError.scriptCreationFailed
         }
-        return process
+
+        var error: NSDictionary?
+        let result = appleScript.executeAndReturnError(&error)
+
+        if let error {
+            let message = error[NSAppleScript.errorMessage] as? String ?? "Unknown error"
+            throw SystemProxyError.adminCommandFailed(message)
+        }
+
+        return result.stringValue ?? ""
     }
 
+    /// Runs networksetup without admin (for read-only queries).
     private func runCapture(_ args: String...) throws -> String {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/sbin/networksetup")
-        process.arguments = Array(args.dropFirst())
+        process.arguments = args
 
         let pipe = Pipe()
         process.standardOutput = pipe
@@ -150,7 +156,10 @@ final class SystemProxyManager: @unchecked Sendable {
         process.waitUntilExit()
 
         guard process.terminationStatus == 0 else {
-            throw SystemProxyError.commandFailed(args.joined(separator: " "), process.terminationStatus)
+            throw SystemProxyError.commandFailed(
+                "networksetup \(args.joined(separator: " "))",
+                process.terminationStatus
+            )
         }
 
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
@@ -162,11 +171,17 @@ final class SystemProxyManager: @unchecked Sendable {
 
 enum SystemProxyError: Error, LocalizedError {
     case commandFailed(String, Int32)
+    case scriptCreationFailed
+    case adminCommandFailed(String)
 
     var errorDescription: String? {
         switch self {
         case .commandFailed(let cmd, let status):
             "Command failed (status \(status)): \(cmd)"
+        case .scriptCreationFailed:
+            "Failed to create AppleScript"
+        case .adminCommandFailed(let message):
+            "Admin command failed: \(message)"
         }
     }
 }
