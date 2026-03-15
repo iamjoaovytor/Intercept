@@ -49,9 +49,15 @@ struct ContentView: View {
                     Text(viewModel.isRunning ? "Port \(viewModel.port)" : "Stopped")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("\(viewModel.events.count) requests")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if viewModel.hasActiveFilters {
+                        Text("\(viewModel.filteredEvents.count)/\(viewModel.events.count) requests")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("\(viewModel.events.count) requests")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
         }

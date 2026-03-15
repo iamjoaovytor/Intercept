@@ -4,7 +4,14 @@ struct RequestListView: View {
     @Bindable var viewModel: ProxyViewModel
 
     var body: some View {
-        Group {
+        VStack(spacing: 0) {
+            filterBar
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+
+            Divider()
+
+            let filtered = viewModel.filteredEvents
             if viewModel.events.isEmpty {
                 ContentUnavailableView(
                     viewModel.isRunning ? "Waiting for traffic" : "Proxy not running",
@@ -15,10 +22,128 @@ struct RequestListView: View {
                             : "Press Start to begin capturing"
                     )
                 )
+                .frame(maxHeight: .infinity)
+            } else if filtered.isEmpty {
+                ContentUnavailableView(
+                    "No matching requests",
+                    systemImage: "line.3.horizontal.decrease.circle",
+                    description: Text("Try adjusting your filters")
+                )
+                .frame(maxHeight: .infinity)
             } else {
-                List(viewModel.events, selection: $viewModel.selectedEventID) { event in
+                List(filtered, selection: $viewModel.selectedEventID) { event in
                     RequestRow(event: event)
                 }
+            }
+        }
+    }
+
+    // MARK: - Filter Bar
+
+    private var filterBar: some View {
+        HStack(spacing: 6) {
+            // Search field
+            HStack(spacing: 4) {
+                Image(systemName: "magnifyingglass")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                TextField("Filter…", text: $viewModel.searchText)
+                    .textFieldStyle(.plain)
+                    .font(.callout)
+                if !viewModel.searchText.isEmpty {
+                    Button {
+                        viewModel.searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 4)
+            .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
+
+            // Method picker
+            Menu {
+                Button("All Methods") { viewModel.methodFilter = nil }
+                Divider()
+                ForEach(ProxyViewModel.MethodFilter.allCases) { method in
+                    Button {
+                        viewModel.methodFilter = method
+                    } label: {
+                        if viewModel.methodFilter == method {
+                            Label(method.rawValue, systemImage: "checkmark")
+                        } else {
+                            Text(method.rawValue)
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 2) {
+                    Text(viewModel.methodFilter?.rawValue ?? "Method")
+                        .font(.caption)
+                        .foregroundStyle(viewModel.methodFilter != nil ? .primary : .secondary)
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 8, weight: .semibold))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
+                .background(
+                    viewModel.methodFilter != nil ? Color.accentColor.opacity(0.12) : Color.clear,
+                    in: RoundedRectangle(cornerRadius: 6)
+                )
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+
+            // Status picker
+            Menu {
+                Button("All Status") { viewModel.statusFilter = nil }
+                Divider()
+                ForEach(ProxyViewModel.StatusFilter.allCases) { status in
+                    Button {
+                        viewModel.statusFilter = status
+                    } label: {
+                        if viewModel.statusFilter == status {
+                            Label(status.rawValue, systemImage: "checkmark")
+                        } else {
+                            Text(status.rawValue)
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 2) {
+                    Text(viewModel.statusFilter?.rawValue ?? "Status")
+                        .font(.caption)
+                        .foregroundStyle(viewModel.statusFilter != nil ? .primary : .secondary)
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 8, weight: .semibold))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
+                .background(
+                    viewModel.statusFilter != nil ? Color.accentColor.opacity(0.12) : Color.clear,
+                    in: RoundedRectangle(cornerRadius: 6)
+                )
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+
+            // Clear all filters
+            if viewModel.hasActiveFilters {
+                Button {
+                    viewModel.clearFilters()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Clear all filters")
             }
         }
     }

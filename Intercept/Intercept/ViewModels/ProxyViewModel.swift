@@ -6,15 +6,79 @@ import NIO
 @Observable
 final class ProxyViewModel {
 
+    // MARK: - Filter Types
+
+    enum MethodFilter: String, CaseIterable, Identifiable {
+        case get = "GET"
+        case post = "POST"
+        case put = "PUT"
+        case delete = "DELETE"
+        case patch = "PATCH"
+
+        var id: String { rawValue }
+    }
+
+    enum StatusFilter: String, CaseIterable, Identifiable {
+        case success = "2xx"
+        case redirect = "3xx"
+        case clientError = "4xx"
+        case serverError = "5xx"
+        case failed = "Failed"
+
+        var id: String { rawValue }
+
+        func matches(_ event: TrafficEvent) -> Bool {
+            switch self {
+            case .success: event.response.map { (200..<300).contains($0.statusCode) } ?? false
+            case .redirect: event.response.map { (300..<400).contains($0.statusCode) } ?? false
+            case .clientError: event.response.map { (400..<500).contains($0.statusCode) } ?? false
+            case .serverError: event.response.map { $0.statusCode >= 500 } ?? false
+            case .failed: event.state == .failed
+            }
+        }
+    }
+
+    // MARK: - State
+
     private(set) var events: [TrafficEvent] = []
     private(set) var isRunning = false
     private(set) var error: String?
 
     var selectedEventID: TrafficEvent.ID?
+    var searchText = ""
+    var methodFilter: MethodFilter?
+    var statusFilter: StatusFilter?
 
     var selectedEvent: TrafficEvent? {
         guard let id = selectedEventID else { return nil }
         return events.first { $0.id == id }
+    }
+
+    var filteredEvents: [TrafficEvent] {
+        var result = events
+
+        if let methodFilter {
+            result = result.filter { $0.request.method == methodFilter.rawValue }
+        }
+
+        if let statusFilter {
+            result = result.filter { statusFilter.matches($0) }
+        }
+
+        let query = searchText.trimmingCharacters(in: .whitespaces).lowercased()
+        if !query.isEmpty {
+            result = result.filter {
+                $0.host.lowercased().contains(query)
+                    || $0.path.lowercased().contains(query)
+                    || $0.request.method.lowercased().contains(query)
+            }
+        }
+
+        return result
+    }
+
+    var hasActiveFilters: Bool {
+        methodFilter != nil || statusFilter != nil || !searchText.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
     private var server: ProxyServer?
@@ -61,6 +125,12 @@ final class ProxyViewModel {
     func clear() {
         events.removeAll()
         selectedEventID = nil
+    }
+
+    func clearFilters() {
+        searchText = ""
+        methodFilter = nil
+        statusFilter = nil
     }
 
     // MARK: - Private
