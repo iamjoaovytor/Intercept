@@ -7,11 +7,11 @@
 - [x] HTTPS interception via CONNECT tunneling
 - [x] Root CA generation and Keychain installation
 - [x] Dynamic per-domain certificate generation
-- [ ] System proxy auto-configuration (SystemConfiguration.framework)
+- [x] System proxy auto-configuration (networksetup)
 - [x] Request list view with domain, method, status, duration
 - [x] Request detail view with headers and body
 - [x] JSON body viewer with syntax highlighting
-- [ ] Basic filtering: domain, method, status code
+- [x] Basic filtering: text search, method, status code
 - [x] Start/stop proxy toggle
 - [x] Clear session
 

@@ -40,9 +40,9 @@ Tests use Swift Testing (`import Testing`, `@Test`) not XCTest.
 
 Three decoupled layers — see `docs/ARCHITECTURE.md` for full details including data flow and certificate flow diagrams.
 
-1. **ProxyCore** (`Intercept/Intercept/ProxyCore/`) — SwiftNIO proxy server, TLS handlers, certificate generation. Zero UI dependencies. Key types: `ProxyServer` (lifecycle + `SequenceGenerator`), `HTTPProxyHandler` with `.httpProxy`/`.httpsRelay` modes + `ResponseCollector` (Handlers/), `RootCAManager` + `CertificateStore` (Certificate/), `TrafficEvent` (Models/).
+1. **ProxyCore** (`Intercept/Intercept/ProxyCore/`) — SwiftNIO proxy server, TLS handlers, certificate generation, system proxy config. Zero UI dependencies. Key types: `ProxyServer` (lifecycle + `SequenceGenerator`), `HTTPProxyHandler` with `.httpProxy`/`.httpsRelay` modes + `ResponseCollector` (Handlers/), `RootCAManager` + `CertificateStore` (Certificate/), `SystemProxyManager` (SystemProxy/), `TrafficEvent` (Models/).
 2. **TrafficStore** (`Intercept/Intercept/TrafficStore/`) — not yet implemented. Currently `ProxyViewModel` holds events in-memory directly.
-3. **InterceptUI** (`Intercept/Intercept/Views/` + `ViewModels/`) — SwiftUI app target. `ProxyViewModel` (`@Observable`, `@MainActor`) owns the `ProxyServer` and event list. `ContentView` has NavigationSplitView with toolbar. `RequestListView` shows captured traffic. `RequestDetailView` shows headers/body with JSON formatting.
+3. **InterceptUI** (`Intercept/Intercept/Views/` + `ViewModels/`) — SwiftUI app target. `ProxyViewModel` (`@Observable`, `@MainActor`) owns `ProxyServer`, `SystemProxyManager`, event list, and filter state. `ContentView` has NavigationSplitView with toolbar. `RequestListView` shows captured traffic with inline filter bar (text search, method/status dropdowns). `RequestDetailView` shows headers/body with JSON formatting.
 
 Data flows one direction: `ProxyServer` → `TrafficEvent` (value type, `@Sendable` closure) → `ProxyViewModel` (`@MainActor`) → SwiftUI Views.
 

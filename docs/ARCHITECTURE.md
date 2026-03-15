@@ -15,6 +15,7 @@ The network engine. Runs a local proxy server using SwiftNIO.
 - Handle CONNECT tunneling for HTTPS with TLS interception
 - Generate per-domain TLS certificates signed by a local root CA
 - Forward requests to the destination server
+- Configure/restore macOS system proxy settings
 - Emit `TrafficEvent` objects for each request/response pair
 
 **Key Types:**
@@ -25,6 +26,7 @@ The network engine. Runs a local proxy server using SwiftNIO.
 - `TrafficEvent` — `Sendable` value type representing a request/response pair with state transitions (`.inProgress` → `.completed`/`.failed`)
 - `RootCAManager` — generates, persists, and installs the root CA in Keychain with trust settings
 - `CertificateStore` — generates and caches per-host TLS certificates signed by the root CA
+- `SystemProxyManager` — enables/disables macOS system HTTP/HTTPS proxy via `networksetup`, saves and restores original settings
 
 ### 2. TrafficStore (planned)
 
@@ -40,13 +42,12 @@ In-memory store of captured traffic with optional SwiftData persistence. Current
 The macOS frontend.
 
 **Current implementation:**
-- `ProxyViewModel` — `@Observable`, `@MainActor` view model that owns `ProxyServer` and event list
-- `ContentView` — NavigationSplitView with toolbar (start/stop, clear, status indicator)
-- `RequestListView` — list of captured traffic with method, host, path, status code, duration
+- `ProxyViewModel` — `@Observable`, `@MainActor` view model that owns `ProxyServer`, `SystemProxyManager`, event list, and filter state
+- `ContentView` — NavigationSplitView with toolbar (start/stop, clear, status indicator with filtered count)
+- `RequestListView` — list of captured traffic with inline filter bar (text search, method dropdown, status dropdown)
 - `RequestDetailView` — tabbed view (Request/Response) showing headers and body with JSON auto-formatting
 
 **Not yet implemented:**
-- Filter bar (domain, method, status code, text search)
 - NSTableView-backed list for performance at scale
 - JSON viewer with collapsible tree
 
@@ -99,6 +100,8 @@ Intercept/
 │   │   ├── Certificate/
 │   │   │   ├── RootCAManager.swift
 │   │   │   └── CertificateStore.swift
+│   │   ├── SystemProxy/
+│   │   │   └── SystemProxyManager.swift
 │   │   └── Models/
 │   │       └── TrafficEvent.swift
 │   ├── TrafficStore/           # (empty, planned)

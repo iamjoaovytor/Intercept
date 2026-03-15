@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import AppKit
 import NIO
 
 @MainActor
@@ -82,6 +83,7 @@ final class ProxyViewModel {
     }
 
     private var server: ProxyServer?
+    private let systemProxy = SystemProxyManager()
 
     var port: Int = 8080
 
@@ -101,15 +103,23 @@ final class ProxyViewModel {
         Task {
             do {
                 try await server.start()
+                try systemProxy.enable(host: "127.0.0.1", port: port)
                 isRunning = true
+                registerTerminationHandler()
             } catch {
                 self.error = error.localizedDescription
+                // If proxy started but system proxy failed, still mark as running
+                if server.localAddress != nil {
+                    isRunning = true
+                }
             }
         }
     }
 
     func stop() {
         guard isRunning else { return }
+
+        systemProxy.disable()
 
         Task {
             do {
@@ -119,6 +129,21 @@ final class ProxyViewModel {
             }
             server = nil
             isRunning = false
+        }
+    }
+
+    // MARK: - Termination Safety
+
+    private var terminationObserver: Any?
+
+    private func registerTerminationHandler() {
+        guard terminationObserver == nil else { return }
+        terminationObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.willTerminateNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.systemProxy.disable()
         }
     }
 
