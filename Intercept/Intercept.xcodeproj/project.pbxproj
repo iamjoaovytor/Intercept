@@ -1,0 +1,623 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BD3E1A302F66FCBD009D6F22 /* NIOSSL in Frameworks */ = {isa = PBXBuildFile; productRef = BD3E1A2F2F66FCBD009D6F22 /* NIOSSL */; };
+		BD3E1A372F66FCF2009D6F22 /* X509 in Frameworks */ = {isa = PBXBuildFile; productRef = BD3E1A362F66FCF2009D6F22 /* X509 */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BD3E1A072F66FC61009D6F22 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD3E19EF2F66FC61009D6F22 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BD3E19F62F66FC61009D6F22;
+			remoteInfo = Intercept;
+		};
+		BD3E1A112F66FC61009D6F22 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD3E19EF2F66FC61009D6F22 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BD3E19F62F66FC61009D6F22;
+			remoteInfo = Intercept;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		BD3E19F72F66FC61009D6F22 /* Intercept.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Intercept.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD3E1A062F66FC61009D6F22 /* InterceptTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InterceptTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD3E1A102F66FC61009D6F22 /* InterceptUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InterceptUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		BD3E19F92F66FC61009D6F22 /* Intercept */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Intercept;
+			sourceTree = "<group>";
+		};
+		BD3E1A092F66FC61009D6F22 /* InterceptTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = InterceptTests;
+			sourceTree = "<group>";
+		};
+		BD3E1A132F66FC61009D6F22 /* InterceptUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = InterceptUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BD3E19F42F66FC61009D6F22 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD3E1A302F66FCBD009D6F22 /* NIOSSL in Frameworks */,
+				BD3E1A372F66FCF2009D6F22 /* X509 in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD3E1A032F66FC61009D6F22 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD3E1A0D2F66FC61009D6F22 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BD3E19EE2F66FC61009D6F22 = {
+			isa = PBXGroup;
+			children = (
+				BD3E19F92F66FC61009D6F22 /* Intercept */,
+				BD3E1A092F66FC61009D6F22 /* InterceptTests */,
+				BD3E1A132F66FC61009D6F22 /* InterceptUITests */,
+				BD3E19F82F66FC61009D6F22 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BD3E19F82F66FC61009D6F22 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD3E19F72F66FC61009D6F22 /* Intercept.app */,
+				BD3E1A062F66FC61009D6F22 /* InterceptTests.xctest */,
+				BD3E1A102F66FC61009D6F22 /* InterceptUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BD3E19F62F66FC61009D6F22 /* Intercept */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD3E1A1A2F66FC61009D6F22 /* Build configuration list for PBXNativeTarget "Intercept" */;
+			buildPhases = (
+				BD3E19F32F66FC61009D6F22 /* Sources */,
+				BD3E19F42F66FC61009D6F22 /* Frameworks */,
+				BD3E19F52F66FC61009D6F22 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				BD3E19F92F66FC61009D6F22 /* Intercept */,
+			);
+			name = Intercept;
+			packageProductDependencies = (
+				BD3E1A2F2F66FCBD009D6F22 /* NIOSSL */,
+				BD3E1A362F66FCF2009D6F22 /* X509 */,
+			);
+			productName = Intercept;
+			productReference = BD3E19F72F66FC61009D6F22 /* Intercept.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BD3E1A052F66FC61009D6F22 /* InterceptTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD3E1A1D2F66FC61009D6F22 /* Build configuration list for PBXNativeTarget "InterceptTests" */;
+			buildPhases = (
+				BD3E1A022F66FC61009D6F22 /* Sources */,
+				BD3E1A032F66FC61009D6F22 /* Frameworks */,
+				BD3E1A042F66FC61009D6F22 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BD3E1A082F66FC61009D6F22 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BD3E1A092F66FC61009D6F22 /* InterceptTests */,
+			);
+			name = InterceptTests;
+			packageProductDependencies = (
+			);
+			productName = InterceptTests;
+			productReference = BD3E1A062F66FC61009D6F22 /* InterceptTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		BD3E1A0F2F66FC61009D6F22 /* InterceptUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD3E1A202F66FC61009D6F22 /* Build configuration list for PBXNativeTarget "InterceptUITests" */;
+			buildPhases = (
+				BD3E1A0C2F66FC61009D6F22 /* Sources */,
+				BD3E1A0D2F66FC61009D6F22 /* Frameworks */,
+				BD3E1A0E2F66FC61009D6F22 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BD3E1A122F66FC61009D6F22 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BD3E1A132F66FC61009D6F22 /* InterceptUITests */,
+			);
+			name = InterceptUITests;
+			packageProductDependencies = (
+			);
+			productName = InterceptUITests;
+			productReference = BD3E1A102F66FC61009D6F22 /* InterceptUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BD3E19EF2F66FC61009D6F22 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2630;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					BD3E19F62F66FC61009D6F22 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+					BD3E1A052F66FC61009D6F22 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = BD3E19F62F66FC61009D6F22;
+					};
+					BD3E1A0F2F66FC61009D6F22 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = BD3E19F62F66FC61009D6F22;
+					};
+				};
+			};
+			buildConfigurationList = BD3E19F22F66FC61009D6F22 /* Build configuration list for PBXProject "Intercept" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BD3E19EE2F66FC61009D6F22;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				BD3E1A2E2F66FCBD009D6F22 /* XCRemoteSwiftPackageReference "swift-nio-ssl" */,
+				BD3E1A352F66FCF2009D6F22 /* XCRemoteSwiftPackageReference "swift-certificates" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = BD3E19F82F66FC61009D6F22 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BD3E19F62F66FC61009D6F22 /* Intercept */,
+				BD3E1A052F66FC61009D6F22 /* InterceptTests */,
+				BD3E1A0F2F66FC61009D6F22 /* InterceptUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BD3E19F52F66FC61009D6F22 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD3E1A042F66FC61009D6F22 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD3E1A0E2F66FC61009D6F22 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BD3E19F32F66FC61009D6F22 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD3E1A022F66FC61009D6F22 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD3E1A0C2F66FC61009D6F22 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BD3E1A082F66FC61009D6F22 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BD3E19F62F66FC61009D6F22 /* Intercept */;
+			targetProxy = BD3E1A072F66FC61009D6F22 /* PBXContainerItemProxy */;
+		};
+		BD3E1A122F66FC61009D6F22 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BD3E19F62F66FC61009D6F22 /* Intercept */;
+			targetProxy = BD3E1A112F66FC61009D6F22 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		BD3E1A182F66FC61009D6F22 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = FYSBP62SYJ;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BD3E1A192F66FC61009D6F22 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = FYSBP62SYJ;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		BD3E1A1B2F66FC61009D6F22 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FYSBP62SYJ;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iamjoaovytor.Intercept;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		BD3E1A1C2F66FC61009D6F22 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FYSBP62SYJ;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iamjoaovytor.Intercept;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		BD3E1A1E2F66FC61009D6F22 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FYSBP62SYJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iamjoaovytor.InterceptTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Intercept.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Intercept";
+			};
+			name = Debug;
+		};
+		BD3E1A1F2F66FC61009D6F22 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FYSBP62SYJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iamjoaovytor.InterceptTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Intercept.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Intercept";
+			};
+			name = Release;
+		};
+		BD3E1A212F66FC61009D6F22 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FYSBP62SYJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iamjoaovytor.InterceptUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Intercept;
+			};
+			name = Debug;
+		};
+		BD3E1A222F66FC61009D6F22 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FYSBP62SYJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iamjoaovytor.InterceptUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Intercept;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BD3E19F22F66FC61009D6F22 /* Build configuration list for PBXProject "Intercept" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD3E1A182F66FC61009D6F22 /* Debug */,
+				BD3E1A192F66FC61009D6F22 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD3E1A1A2F66FC61009D6F22 /* Build configuration list for PBXNativeTarget "Intercept" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD3E1A1B2F66FC61009D6F22 /* Debug */,
+				BD3E1A1C2F66FC61009D6F22 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD3E1A1D2F66FC61009D6F22 /* Build configuration list for PBXNativeTarget "InterceptTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD3E1A1E2F66FC61009D6F22 /* Debug */,
+				BD3E1A1F2F66FC61009D6F22 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD3E1A202F66FC61009D6F22 /* Build configuration list for PBXNativeTarget "InterceptUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD3E1A212F66FC61009D6F22 /* Debug */,
+				BD3E1A222F66FC61009D6F22 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BD3E1A2E2F66FCBD009D6F22 /* XCRemoteSwiftPackageReference "swift-nio-ssl" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-nio-ssl";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.36.0;
+			};
+		};
+		BD3E1A352F66FCF2009D6F22 /* XCRemoteSwiftPackageReference "swift-certificates" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-certificates.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.18.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BD3E1A2F2F66FCBD009D6F22 /* NIOSSL */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD3E1A2E2F66FCBD009D6F22 /* XCRemoteSwiftPackageReference "swift-nio-ssl" */;
+			productName = NIOSSL;
+		};
+		BD3E1A362F66FCF2009D6F22 /* X509 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD3E1A352F66FCF2009D6F22 /* XCRemoteSwiftPackageReference "swift-certificates" */;
+			productName = X509;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = BD3E19EF2F66FC61009D6F22 /* Project object */;
+}
